@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+    <script language="javascript">
+      function validate() {
+        let pw1 = document.getElementById("pw1").value;
+        let pw2 = document.getElementById("pw2").value;
+
+        if (pw1 != pw2) {
+          alert("암호가 서로 다릅니다. 다시입력하세요");
+          return false;
+        }
+        return true;
+      }
+    </script>
+
+    <p>
+    <div class="container">  <!-- container class 가 페이지의 컨텐츠영역을 지정 -->
+    <div class="jumbotron" style="width:500px; margin:auto">
+
+    <div class="bm-login-form" style='width:400px; margin-left:auto; margin-right:auto; border:1px'>
+
+      <div class="starter-template">
+        <h5>회원 정보</h5>
+        <hr>
+        <p>해당 페이지에서 회원 정보를 변경할 수 있습니다</p>
+      </div>
+
+     <form name=join onsubmit="return validate()" method=post action="/users/profile/change">
+       <!-- 로그인 된 회원 이름을 전달하기 위한 용도로 disabled된 input을 하나 더 전달한다. -->
+       <div class="form-group">
+         <label for="exampleUserName">로그인된 회원 이름</label>
+         <input class="form-control" name="username" id="username" value="<%=reglabel%>" readonly>
+       </div>
+       <div class="form-group">
+         <label for="exampleInputPhone1">휴대폰 번호</label>
+         <input type="text" class="form-control" name="phone" id="phone" placeholder="변경할 휴대폰 번호를 입력해주세요.">
+       </div>
+       <div class="form-group">
+         <label for="exampleInputPassword1">변경할 암호</label>
+         <input type="password" class="form-control" name="pw1" id="pw1" placeholder="암호는 최대20자까지 입력">
+       </div>
+       <div class="form-group">
+         <label for="exampleInputPassword2">한번더</label>
+         <input type="password" class="form-control" name="pw2" id="pw2" placeholder="암호를 한번더 입력해주세요">
+       </div>
+       <button type="submit" class="btn btn-primary">회원가입</button>
+      </form>
+     </div>
+     </div>
+    </div><!-- /.container -->
+
+ <!-- Footer 영역 -->

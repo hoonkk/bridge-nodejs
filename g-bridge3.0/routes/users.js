@@ -187,14 +187,59 @@ router.get('/logout', HandleLogout);       // 로그아웃 기능
 // 3.0 version에서 추가로 개발된 부분
 const PrintProfile = (req, res) => {
   let    htmlstream = '';
+       htmlstream = fs.readFileSync(__dirname + '/../views/header.ejs','utf8');
+       htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/navbar.ejs','utf8');
+       htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/profile.ejs','utf8');
+       htmlstream = htmlstream + fs.readFileSync(__dirname + '/../views/footer.ejs','utf8');
+       res.writeHead(200, {'Content-Type':'text/html; charset=utf8'});
+       res.end(ejs.render(htmlstream,  { 'title' : '회원정보',
+                                         'logurl': '/users/logout',
+                                         'loglabel': '로그아웃',
+                                         'regurl': '/users/profile',
+                                         'reglabel': req.session.who }));
+};
 
-       htmlstream = fs.readFileSync(__dirname + '/../views/alert.ejs','utf8');
-       res.status(562).end(ejs.render(htmlstream, { 'title': '알리미',
-                           'warn_title':'계정정보 준비중',
-                           'warn_message':'계정정보(예, 암호변경, 주소변경, 전화번호변경 등)변경기능을 추후에 개발할 예정입니다',
-                          'return_url':'/' }));
-}
+// 회원 정보 양식에서 변경한 내용(비밀번호, 핸드폰번호)를 데이터베이스에 반영합니다.
+const HandleChangeProfile = (req, res) => {
+let body = req.body;
+let htmlstream='';
+let hashpwd= '';
+let query_str = '';
+console.log(body.username);
+    // 변경한 내용을 임시로 확인하기 위해 콘솔에 출력해봅니다.
+    console.log('변경하고자 하는 입력 정보 :%s, %s',body.phone, body.pw1);
+
+    if (body.phone == '' || body.pw1 == '') {
+         console.log("데이터입력이 되지 않아 DB에 저장할 수 없습니다.");
+         res.status(561).end('<meta charset="utf-8">데이터가 입력되지 않아 가입을 할 수 없습니다');
+    }
+    else {
+       // 이제 변경된 핸드폰번호와 비밀번호를 데이터베이스에 반영합니다.
+       // 위와 마찬가지로 변경할 비밀번호도 암호화하여 디비에 저장합니다.
+       hashpwd = crypto.createHash('sha512').update(body.pw1).digest('base64');
+
+       // profile 양식에서 전달받은 reglabel을 통하여 사용자의 name을 추출하고 이를 통하여 디비에서 해당 name을 가진 회원의 정보를 수정한다.
+       // 이때 수정할 내용은 핸드폰번호와 암호화된 암호로 이전 양식에서 전달된 값이다.
+       query_str = `UPDATE u10_users SET phone=${body.phone}, pass='${hashpwd}' WHERE name='${body.username}'`;
+       console.log('SQL: ' + query_str);
+       db.query(query_str, (error, results, fields) => {
+          if (error) {
+            console.log(error);
+            htmlstream = fs.readFileSync(__dirname + '/../views/alert.ejs','utf8');
+            res.status(562).end(ejs.render(htmlstream, { 'title': '알리미',
+                               'warn_title':'회원정보 변경 오류',
+                               'warn_message':'존재하지 않는 회원의 정보 변경을 시도하였습니다.',
+                               'return_url':'/' }));
+          } else {
+           console.log("회원정보 변경에 성공하였으며, DB에 반영되었습니다.");
+           res.redirect('/');
+          }
+       });
+
+    }
+};
 
 router.get('/profile', PrintProfile);     // 정보변경화면을 출력
+router.post('/profile/change', HandleChangeProfile);     // 정보변경화면을 출력
 
 module.exports = router;
