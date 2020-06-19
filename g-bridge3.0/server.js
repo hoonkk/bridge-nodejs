@@ -13,6 +13,7 @@ const   users = require('./routes/users');
 const   adminprod = require('./routes/adminprod');
 const   adminuser = require('./routes/adminuser');
 const   product = require('./routes/product');
+const   produpdate = require('./routes/produpdate');
 
 // 쇼핑몰전용 PORT주소 설정
 const   PORT = 65010;
@@ -36,6 +37,7 @@ app.use('/users', users);   // URI('/users') 접속하면 users로 라우팅
 app.use('/adminprod', adminprod); // URI('/adminprod') 접속하면 adminprod로 라우팅
 app.use('/adminuser', adminuser); // URI('/adminprod') 접속하면 adminprod로 라우팅
 app.use('/product', product); // URI('/product') 접속하면 product로 라우팅
+app.use('/produpdate', produpdate); // URI('/produpdate') 접속하면 produpdate 라우팅
 // app.use('/log', login);
 // app.use('/log', login);
 // app.use('/log', login);

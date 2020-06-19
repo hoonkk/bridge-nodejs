@@ -17,7 +17,7 @@
         <h4> 상품 수정 화면</h4> <hr>
       </div>
 
-   <form name=join method=post action="/update/clear" enctype="multipart/form-data">
+   <form name=join method=post action="/produpdate/clear" enctype="multipart/form-data">
         <div class="form-group">
          <label for="exampleFormControlSelect1">상품분류</label>
           <select class="form-control" id="exampleFormControlSelect1" name=category>
@@ -30,7 +30,7 @@
           </select>
        </div>
        <div class="form-group">
-         <label for="exampleInputEmail1">상품번호</label>
+         <label for="exampleInputEmail1">상품번호(변경할 수 없음)</label>
          <input type="text" class="form-control" name="itemid" id="itemid" aria-describedby="emailHelp" value="<%=itemid%>" readonly>
        </div>
     <div class="form-row">
