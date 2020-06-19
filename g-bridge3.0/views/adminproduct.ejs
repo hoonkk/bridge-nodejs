@@ -1,4 +1,13 @@
 <!DOCTYPE html>
+<!-- 페이지네이션 시에 active 값을 변경하기 위한 스크립트 -->
+<script language="javascript">
+  function on_to_active(page_active, non_active_page_1, non_active_page_2) {
+    // 클릭한 페이지를 active 상태로 바꾸고 나머지는 기본값으로 수정한다
+    document.getElementById(page_active).setAttribute('class', 'page-item active');
+    document.getElementById(non_active_page_1).setAttribute('class', 'page-item');
+    document.getElementById(non_active_page_2).setAttribute('class', 'page-item');
+  };
+</script>
  <!--  Content (배너이미지) 부분 -->
   <div> <img src="/images/admin_banner.png" class="img-fluid" alt="배너이미지" width="100%"> </div>
 
@@ -18,8 +27,8 @@
       <hr>
       <div class="container">
         <a class="btn btn-default" href="/adminprod/form">+신규등록</a>
-        <a class="btn btn-default" href="#">±상품수정</a>
         <a class="btn btn-default" href="#">-선택삭제</a>
+        <p> 상품 번호를 클릭하여 상품 수정을 할 수 있습니다!
           <table class="table table-striped">
             <thead>
               <tr>
@@ -36,7 +45,11 @@
             <tbody>
                <% prodata.forEach(function (item, index) { %>
               <tr>
-                <td> <%= item.itemid %> </td>
+                <td>
+                  <a href= "update?itemid=<%= item.itemid %>">
+                    <%= item.itemid %>
+                  <a>
+                </td>
                 <td> <%= item.category %> </td>
                 <td> <%= item.maker %> </td>
                 <td> <%= item.pname %> </td>
@@ -52,16 +65,15 @@
   <p>
   <nav aria-label="...">
   <ul class="pagination justify-content-center">
-    <li class="page-item disabled">
-      <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-    </li>
-      <li class="page-item active" aria-current="page">
-      <a class="page-link" href="#">1 <span class="sr-only">(current)</span></a>
-    </li>
-    <li class="page-item"><a class="page-link" href="#">2</a></li>
-    <li class="page-item"><a class="page-link" href="#">3</a></li>
-    <li class="page-item">
-      <a class="page-link" href="#">Next</a>
-    </li>
+      <li class="page-item" id="page_1" onclick="on_to_active('page_1, 'page_2', 'page_3')">
+        <a class="page-link" href="?page=1">1</a>
+      </li>
+      <li class="page-item" id="page_2" onclick="on_to_active('page_2', 'page_1', 'page_3')">
+        <a class="page-link" href="?page=2">2</a>
+      </li>
+      <li class="page-item" id="page_3" onclick="on_to_active('page_3', 'page_2', 'page_1')">
+        <a class="page-link" href="?page=3">3</a>
+      </li>
+
   </ul>
 </nav>

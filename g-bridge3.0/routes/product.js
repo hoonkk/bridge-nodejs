@@ -100,9 +100,9 @@ const BuyProduct = (req, res) => {
      }
   });
 
-  // 데이터베이스에서 pname이 일치하는 항목을 찾은 뒤 상품 개수를 감소시킨다.
+  // 데이터베이스에서 pname이 일치하는 항목을 찾은 뒤 상품 개수를 감소시키고 매출총액을 그만큼 늘린다.
   // 이때 재고가 부족하면 구매 처리가 되지 않도록 디비 스키마를 수정하였습니다.
-  let product_query = `UPDATE u10_products SET amount = amount - ${body.amount} WHERE pname='${body.pname}'`;
+  let product_query = `UPDATE u10_products SET amount = amount - ${body.amount}, sales = sales + ${totalPrice} WHERE pname='${body.pname}'`;
   console.log("SQL: " , product_query);
   db.query(product_query, (error, results, fields) => {
     if (error) {
@@ -114,6 +114,11 @@ const BuyProduct = (req, res) => {
                          'return_url':'/' }));
     } else {
      console.log(`${body.pname} 상품의 개수가 ${body.amount} 만큼 감소하였습니다.`);
+     htmlstream = fs.readFileSync(__dirname + '/../views/alert.ejs','utf8');
+     res.status(562).end(ejs.render(htmlstream, { 'title': '알리미',
+                        'warn_title':'상품 구매 처리 완료',
+                        'warn_message':'상품 구매 신청이 완료되었습니다. 버튼을 누르면 돌아갑니다.',
+                        'return_url':'/' }));
     }
   });
 

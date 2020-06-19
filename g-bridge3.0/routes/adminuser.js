@@ -65,4 +65,7 @@ const AdminPrintUser = (req, res) => {
 // REST API의 URI와 핸들러를 매핑합니다.
 router.get('/userlist', AdminPrintUser);      // 상품리스트를 화면에 출력
 
+
+
+
 module.exports = router;
