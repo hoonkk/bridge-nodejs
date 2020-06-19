@@ -1,4 +1,39 @@
 <!DOCTYPE html>
+
+<!-- 구매 버튼 클릭 스크립트 -->
+<script language="javascript">
+  function buy(price, pname, modelnum) {
+    // 구매 수량을 입력한 input의 id를 구분하기 위해 modelnum을 이용한다.
+    let amount = document.getElementById(modelnum).value;
+    // 데이터를 담아 리다이렉트 하기위한 hidden input으로 구성된 form을 생성한다.
+    let form = document.createElement("form");
+    form.action = "/product/buy";
+    form.method = "POST";
+
+    // 폼을 통하여 옮겨줄 데이터는 상품의 가격, 개수, 그리고 어떤 상품인지 판별하기 위한 상품 이름이다.
+    let price_input = document.createElement("input");
+    price_input.type = "hidden";
+    price_input.name = "price";
+    price_input.value = price;
+
+    let amount_input = document.createElement("input");
+    amount_input.type = "hidden";
+    amount_input.name = "amount";
+    amount_input.value = amount;
+
+    let pname_input = document.createElement("input");
+    pname_input.type = "hidden";
+    pname_input.name = "pname";
+    pname_input.value = pname;
+
+    // hidden input을 담은 form을 body에 추가하고 제출하여 리다이렉트 시킨다.
+    form.appendChild(price_input);
+    form.appendChild(amount_input);
+    form.appendChild(pname_input);
+    document.body.appendChild(form);
+    form.submit();
+  }
+</script>
  <!--  Content (배너이미지) 부분 -->
   <div> <img src="/images/banner1.png" class="img-fluid" alt="배너이미지" width="100%"> </div>
 
@@ -20,18 +55,34 @@
         <% prodata.forEach(function (item, index) { %>
           <div class=col-4>
 
-         <div class="card border-primary mb-3" style="max-width: 18rem; max-height: 26rem">
-            <div class="card-header bg-transparent border-primary"><strong><%= item.pname %> </strong> <small> [<%= item.maker %>] </small></div>
+         <div class="card border-primary mb-3" style="max-width: 18rem; max-height: 28rem">
+            <div class="card-header bg-transparent border-primary">
+              <span id="pname">
+                <strong><%= item.pname %> </strong>
+              </span>
+              <small> [<%= item.maker %>] </small></div>
             <div class="card-body text-primary">
-                <div> <img class="img-fluid" src=<%=item.pic %> > </div>
-           <p class="card-text">좋은상품입니다
+                <div> <img width="250" height="180"  src=<%=item.pic %> > </div>
+           <p class="card-text"><%= item.exp %>
             </div>
-            <div class="card-footer bg-transparent"><%= item.price %>원 &nbsp;&nbsp;&nbsp;&nbsp;<%= item.modelnum %> </div>
-            <div class="card-footer bg-transparent"><button type=button class="btn btn-primary">구매하기</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                                 <button type=button class="btn btn-warning">구매후기</button> </div>
+            <div class="card-footer bg-transparent">
+              <span id="price">
+                <%= item.price %>
+              </span>
+              원
+              &nbsp;&nbsp;&nbsp;&nbsp;
+              <%= item.modelnum %>
+            </div>
+            <div class="card-footer bg-transparent">
+              구매수량
+              <input value="1" id="<%=item.modelnum%>">
+              <button onclick= "buy('<%=item.price%>', '<%=item.pname%>', '<%=item.modelnum%>');"
+                type=button class="btn btn-primary">구매하기</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <button type=button class="btn btn-warning">구매후기</button> </div>
           </div>
 
-          </div>
+        </div>
        <% }); %>
       </div>
     </div>

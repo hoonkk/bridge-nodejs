@@ -240,12 +240,12 @@ console.log(body.username);
        // 위와 마찬가지로 변경할 비밀번호와 핸드폰번호를 암호화하여 디비에 저장합니다.
        password = cipher(body.pw1, key);
        phone_num = cipher(body.phone, key);
-
+       console.log(`${password} ,  %{phone_num}`);
        // profile 양식에서 전달받은 reglabel을 통하여 사용자의 name을 추출하고 이를 통하여 디비에서 해당 name을 가진 회원의 정보를 수정한다.
        // 이때 수정할 내용은 핸드폰번호와 암호화된 암호로 이전 양식에서 전달된 값이다.
        // 템플릿 리터럴을 사용하여 쿼리문 작성
 
-       query_str = `UPDATE u10_users SET phone=${phone_num}, pass='${password}' WHERE name='${body.username}'`;
+       query_str = `UPDATE u10_users SET phone='${phone_num}', pass='${password}' WHERE name='${body.username}'`;
        console.log('SQL: ' + query_str);
        db.query(query_str, (error, results, fields) => {
           if (error) {
@@ -265,6 +265,6 @@ console.log(body.username);
 };
 
 router.get('/profile', PrintProfile);     // 정보변경화면을 출력
-router.post('/profile/change', HandleChangeProfile);  
+router.post('/profile/change', HandleChangeProfile);
 
 module.exports = router;

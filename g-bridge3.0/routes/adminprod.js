@@ -110,10 +110,11 @@ const HanldleAddProduct = (req, res) => {  // 상품등록
 
               prodimage = prodimage + picfile.filename;
               regdate = new Date();
-              db.query('INSERT INTO u10_products (itemid, category, maker, pname, modelnum,rdate,price,dcrate,amount,event,pic) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)',
+              db.query('INSERT INTO u10_products (itemid, category, maker, pname, modelnum,rdate,price,dcrate,amount,event,pic,exp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)',
                     [body.itemid, body.category, body.maker, body.pname, body.modelnum, regdate,
-                     body.price, body.dcrate, body.amount, body.event, prodimage], (error, results, fields) => {
+                     body.price, body.dcrate, body.amount, body.event, prodimage, body.exp], (error, results, fields) => {
                if (error) {
+                   console.log(error);
                    htmlstream = fs.readFileSync(__dirname + '/../views/alert.ejs','utf8');
                    res.status(562).end(ejs.render(htmlstream, { 'title': '알리미',
                                  'warn_title':'상품등록 오류',
