@@ -16,6 +16,27 @@ const   db = mysql.createConnection({
     database: 'bridge'         //사용할 DB명
 });
 
+
+const key = 'bridge';
+
+// 암호화 복호화 함수 생성
+const cipher = (password, key) => {
+	const encrypt = crypto.createCipher('des', key);
+	const encryptResult = encrypt.update(password, 'utf8', 'base64')
+		+ encrypt.final('base64');
+	console.log(encryptResult);
+	return encryptResult;
+};
+
+const decipher = (password, key) => {
+	const decode = crypto.createDecipher('des', key);
+	const decodeResult = decode.update(password, 'base64', 'utf8')
+		+ decode.final('utf8');
+	console.log(decodeResult);
+};
+
+
+
 //  -----------------------------------  회원가입기능 -----------------------------------------
 // 회원가입 입력양식을 브라우져로 출력합니다.
 const PrintRegistrationForm = (req, res) => {
@@ -48,7 +69,8 @@ const PrintRegistrationForm = (req, res) => {
 const HandleRegistration = (req, res) => {  // 회원가입
 let body = req.body;
 let htmlstream='';
-let hashpwd= '';
+let password= '';
+let phone_num='';
 
     // 임시로 확인하기 위해 콘솔에 출력해봅니다.
     console.log('회원가입 입력정보 :%s, %s, %s',body.uid, body.pw1, body.uname);
@@ -60,14 +82,13 @@ let hashpwd= '';
     else {
       // 3.0 version에서 point, phone 추가
       // crypto 모듈을 이용한 암호화 추가
-      // 비밀번호를 hash로 암호화하게 되면서 데이터의 길이가 길어지면서 u10_users 테이블의 pass 컬럼의 스키마를 변경하였습니다.
-      // varchar(64) ==> varchar(128)로 변경(비밀번호를 너무 길게 입력하면 data too long 에러가 발생할 수 있음)
 
-       // 입력받은 비밀번호를 crypto 모듈을 이용하여 암호화한다.
-       hashpwd = crypto.createHash('sha512').update(body.pw1).digest('base64');
-
+       // 입력받은 비밀번호와 핸드폰번호를 암호화한다.
+       password = cipher(body.pw1, key);
+       phone_num = cipher(body.phone, key);
        // 데이터베이스에는 암호화된 비밀번호가 저장된다.
-       db.query('INSERT INTO u10_users (uid, pass, name, point, phone) VALUES (?, ?, ?, ?, ?)', [body.uid, hashpwd, body.uname, body.point, body.phone], (error, results, fields) => {
+       // 단, 기존에 int로 정의되었던 phone 컬럼의 스키마를 varchar(64)로 바꿔준다. (데이터가 암호화를 거치면서 길어졌기 때문))
+       db.query('INSERT INTO u10_users (uid, pass, name, point, phone) VALUES (?, ?, ?, ?, ?)', [body.uid, password, body.uname, body.point, phone_num], (error, results, fields) => {
           if (error) {
             console.log(error);
             htmlstream = fs.readFileSync(__dirname + '/../views/alert.ejs','utf8');
@@ -124,7 +145,7 @@ const HandleLogin = (req, res) => {
   let userid, userpass, username;
   let sql_str;
   let htmlstream = '';
-  let hashpwd = '';
+  let password = '';
       console.log('로그인 입력정보: %s, %s', body.uid, body.pass);
       if (body.uid == '' || body.pass == '') {
          console.log("아이디나 암호가 입력되지 않아서 로그인할 수 없습니다.");
@@ -132,10 +153,10 @@ const HandleLogin = (req, res) => {
       }
       else {
        console.log("입력한 비밀번호" + body.pass + "를 암호화한 값으로 데이터베이스에서 검색합니다.");
-       //로그인 폼에서 입력한 비밀번호를 암호화하여 hashpwd에 넣어준다.
-       hashpwd = crypto.createHash('sha512').update(body.pass).digest('base64');
+       //로그인 폼에서 입력한 비밀번호를 암호화하여 password에 넣어준다.
+       password = cipher(body.pass, key);
        //암호화된 값인 hasspwd로 디비에서 검색한다.
-       sql_str = "SELECT uid, pass, name from u10_users where uid ='"+ body.uid +"' and pass='" + hashpwd + "';";
+       sql_str = "SELECT uid, pass, name from u10_users where uid ='"+ body.uid +"' and pass='" + password + "';";
        console.log("SQL: " + sql_str);
        db.query(sql_str, (error, results, fields) => {
          if (error) { res.status(562).end("Login Fail as No id in DB!"); }
@@ -152,7 +173,7 @@ const HandleLogin = (req, res) => {
                   userpass = item.pass;
                   username = item.name;
                   console.log("DB에서 로그인성공한 ID/암호:%s/%s", userid, userpass);
-                  if (body.uid == userid && hashpwd == userpass) { // 암호화한 값과 디비에 저장되있는 암호화된 비밀번호 값을 비교하여 판별한다.
+                  if (body.uid == userid && password == userpass) { // 암호화한 값과 디비에 저장되있는 암호화된 비밀번호 값을 비교하여 판별한다.
                      req.session.auth = 99;      // 임의로 수(99)로 로그인성공했다는 것을 설정함
                      req.session.who = username; // 인증된 사용자명 확보 (로그인후 이름출력용)
                      if (body.uid == 'admin')    // 만약, 인증된 사용자가 관리자(admin)라면 이를 표시
@@ -203,7 +224,8 @@ const PrintProfile = (req, res) => {
 const HandleChangeProfile = (req, res) => {
 let body = req.body;
 let htmlstream='';
-let hashpwd= '';
+let password= '';
+let phone_num= '';
 let query_str = '';
 console.log(body.username);
     // 변경한 내용을 임시로 확인하기 위해 콘솔에 출력해봅니다.
@@ -215,12 +237,15 @@ console.log(body.username);
     }
     else {
        // 이제 변경된 핸드폰번호와 비밀번호를 데이터베이스에 반영합니다.
-       // 위와 마찬가지로 변경할 비밀번호도 암호화하여 디비에 저장합니다.
-       hashpwd = crypto.createHash('sha512').update(body.pw1).digest('base64');
+       // 위와 마찬가지로 변경할 비밀번호와 핸드폰번호를 암호화하여 디비에 저장합니다.
+       password = cipher(body.pw1, key);
+       phone_num = cipher(body.phone, key);
 
        // profile 양식에서 전달받은 reglabel을 통하여 사용자의 name을 추출하고 이를 통하여 디비에서 해당 name을 가진 회원의 정보를 수정한다.
        // 이때 수정할 내용은 핸드폰번호와 암호화된 암호로 이전 양식에서 전달된 값이다.
-       query_str = `UPDATE u10_users SET phone=${body.phone}, pass='${hashpwd}' WHERE name='${body.username}'`;
+       // 템플릿 리터럴을 사용하여 쿼리문 작성
+
+       query_str = `UPDATE u10_users SET phone=${phone_num}, pass='${password}' WHERE name='${body.username}'`;
        console.log('SQL: ' + query_str);
        db.query(query_str, (error, results, fields) => {
           if (error) {
@@ -240,6 +265,6 @@ console.log(body.username);
 };
 
 router.get('/profile', PrintProfile);     // 정보변경화면을 출력
-router.post('/profile/change', HandleChangeProfile);     // 정보변경화면을 출력
+router.post('/profile/change', HandleChangeProfile);  
 
 module.exports = router;
